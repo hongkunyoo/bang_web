@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lat/Lng Object Literal</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtiGIgkPnrmNxcsFD9uXrGHobL1B3XIQ0"></script>
+    <script>
+      // In this example, we center the map, and add a marker, using a LatLng object
+      // literal instead of a google.maps.LatLng object. LatLng object literals are
+      // a convenient way to add a LatLng coordinate and, in most cases, can be used
+      // in place of a google.maps.LatLng object.
+
+// '"location":[[126.91069305496217,37.50164770026634],[126.94202125625611,37.51609894744943]]}' \
+//               '&position={"center":[126.92635715560914,37.508873673575714],"zoom":16}&cluster={}'
+      var lng = 126.95619350240032;
+
+      var lat = 37.55123293549791;
+      var map;
+      
+      var host = window.location.search;
+      
+      var HOST = host.split('?')[1];
+
+      var markers = [];
+
+      function CenterControl(controlDiv, map) {
+
+        // Set CSS for the control border.
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '3px';
+        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.marginBottom = '22px';
+        controlUI.style.textAlign = 'center';
+        controlUI.title = 'Click to recenter the map';
+        controlDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior.
+        var controlText = document.createElement('div');
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '16px';
+        controlText.style.lineHeight = '38px';
+        controlText.style.paddingLeft = '5px';
+        controlText.style.paddingRight = '5px';
+        controlText.innerHTML = 'List Bang';
+        controlUI.appendChild(controlText);
+
+        // Setup the click event listeners: simply set the map to Chicago.
+        controlUI.addEventListener('click', function() {
+          var url = HOST + "/list/1000";
+          $.getJSON(url, function(result){
+               print_bang_list(result, markers)               
+            });
+        });
+
+      }
+
+      function print_bang_list(result, markers) {
+          for (var i = 0 ; i < result.length ; i++) {
+
+            var marker = new google.maps.Marker({
+              position: {lat: result[i].location_lat, lng: result[i].location_lng},
+              map: map
+            });
+            markers.push(marker)
+            
+         }
+      }
+
+      function initialize() {
+        var mapOptions = {
+          zoom: 12,
+          center: {lat: lat, lng: lng}
+        };
+        map = new google.maps.Map(document.getElementById('map'),
+            mapOptions);
+
+        var homeControlDiv = document.createElement('div');
+        var homeControl = new CenterControl(homeControlDiv, map);
+
+        CenterControl.index = 1;
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
+        // lat_lng = [[36.8, 126.47], [36.8, 126.49],[36.8, 126.51], [36.8, 126.53], [36.8, 126.55]];
+        // for (i in lat_lng) {
+        //     console.log(lat_lng[i]);
+        //     var marker = new google.maps.Marker({
+        //       // The below line is equivalent to writing:
+        //       // position: new google.maps.LatLng(-34.397, 150.644)
+        //       position: {lat: lat_lng[i][0], lng: lat_lng[i][1]},
+        //       map: map
+        //     });
+        // }
+        
+        google.maps.event.addListener(map, "click", function (event) {
+            var latitude = event.latLng.lat();
+            var longitude = event.latLng.lng();
+            console.log( latitude + ', ' + longitude );
+            for (var j in markers) {
+              markers[j].setMap(null);
+            }
+            
+            var marker = new google.maps.Marker({
+              // The below line is equivalent to writing:
+              // position: new google.maps.LatLng(-34.397, 150.644)
+              position: {lat: latitude, lng: longitude},
+              map: map
+            });
+            markers.push(marker)
+            var url = HOST + "/spot/" + latitude + "/" + longitude;
+            // console.log(url);
+
+            // jQuery.ajax({
+            //   url: url, 
+            //   dataType: 'json',
+
+            //   success: function(result){
+            //     console.log(result);
+            //     for (i in result) {
+            //       console.log(i);
+            //     }
+            // }});
+
+            $.getJSON(url, function(result){
+        
+               print_bang_list(result, markers)
+            });
+
+            // $.getJSON(url, function( data ) {
+            //   console.log(data);
+            // });
+
+          //   $.ajax({
+          //     url: url,
+
+          //    //contentType: "application/json",
+          //    dataType: 'json',
+          //    complete: function(data) {
+          //        console.log(data);
+          //   }
+          // });
+
+
+        });
+        
+
+        // var marker = new google.maps.Marker({
+        //   // The below line is equivalent to writing:
+        //   // position: new google.maps.LatLng(-34.397, 150.644)
+        //   position: {lat: 37.800000, lng: 127.470000},
+        //   map: map
+        // });
+
+        // var marker = new google.maps.Marker({
+        //   // The below line is equivalent to writing:
+        //   // position: new google.maps.LatLng(-34.397, 150.644)
+        //   position: {lat: 36.800000, lng: 126.470000},
+        //   map: map
+        // });
+
+        // var marker = new google.maps.Marker({
+        //   // The below line is equivalent to writing:
+        //   // position: new google.maps.LatLng(-34.397, 150.644)
+        //   position: {lat: 36.800000, lng: 127.470000},
+        //   map: map
+        // });
+
+
+        // You can use a LatLng literal in place of a google.maps.LatLng object when
+        // creating the Marker object. Once the Marker object is instantiated, its
+        // position will be available as a google.maps.LatLng object. In this case,
+        // we retrieve the marker's position using the
+        // google.maps.LatLng.getPosition() method.
+        // var infowindow = new google.maps.InfoWindow({
+        //   content: '<p>Marker Location:' + marker.getPosition() + '</p>'
+        // });
+
+        // google.maps.event.addListener(marker, 'click', function() {
+        //   infowindow.open(map, marker);
+        // });
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+    <div id="map"></div>
+  </body>
+</html>

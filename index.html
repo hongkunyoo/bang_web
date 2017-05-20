@@ -73,14 +73,24 @@
 
       }
 
-      function print_bang_list(result, markers) {
-          for (var i = 0 ; i < result.length ; i++) {
+      function print_bang_list(results, markers) {
+          for (var i = 0 ; i < results.length ; i++) {
+          	(function(j) {
+          		var result = results[j];
+	            var marker = new google.maps.Marker({
+	              position: {lat: result.location_lat, lng: result.location_lng},
+	              map: map
+	            });
 
-            var marker = new google.maps.Marker({
-              position: {lat: result[i].location_lat, lng: result[i].location_lng},
-              map: map
-            });
-            markers.push(marker)
+	            marker.addListener('click', function() {
+	              
+		          var id = result.PartitionKey;
+		          var url = "https://www.dabangapp.com/room/" + id;
+		          window.open(url);
+		        });
+
+	            markers.push(marker)
+	        })(i);
             
          }
       }
